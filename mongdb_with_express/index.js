@@ -2,8 +2,10 @@ const express = require('express');
 const app = express();
 const Chat=require("./models/chat.js");
 const mongoose = require('mongoose');
-const port = 3000;
+const port = 2000;
 const path = require('path');
+app.use(express.urlencoded({extended:true}));
+app.use(express.static(path.join(__dirname,"public")));
 
 // Set the view engine to EJS
 app.set('views', path.join(__dirname, 'views'));
@@ -37,13 +39,32 @@ app.get('/', (req, res) => {
 //route to show all chats
 app.get('/chats', async (req,res)=>{
   let allchat= await Chat.find();
-  console.log(allchat);
-  res.send("working");
+//   console.log(allchat);
+  res.render("index.ejs",{allchat});
 })
 
 // Start the server
 app.listen(port, () => {
     console.log(`Server listening on http://localhost:${port}`);
 });
-//create a model
+app.get('/chats/new',(req,res)=>{
+    res.render("new.ejs");
+
+})
+//create a route
+app.post('/chats',(req,res)=>{
+    let {from ,to,msg}=req.body;
+    let newchat=new Chat({
+        from : from,
+        to:to,
+        msg:msg,
+        created_at:new Date()
+
+    });
+    console.log(newchat);
+    newchat.save().then((res)=>{console.log(res)
+
+    }).catch(err=>console.log(err));
+    res.redirect("/chats");
+})
 
